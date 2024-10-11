@@ -1,21 +1,18 @@
-use lazy_static::lazy_static;
 use log::*;
 use std::{
     collections::HashMap,
     env::current_exe,
     path::PathBuf,
     process::{Child, Command},
-    sync::Mutex,
+    sync::{LazyLock, Mutex},
     thread::sleep,
     time::Duration,
 };
 
 use crate::{error, Kind};
 
-lazy_static! {
-    static ref PROC: Mutex<HashMap<Kind, Child>> = Mutex::new(HashMap::new());
-    static ref EXE: PathBuf = current_exe().unwrap();
-}
+static PROC: LazyLock<Mutex<HashMap<Kind, Child>>> = LazyLock::new(|| Mutex::new(HashMap::new()));
+static EXE: LazyLock<PathBuf> = LazyLock::new(|| current_exe().unwrap());
 
 pub fn bootstrap() -> Result<(), std::io::Error> {
     spawn(Kind::Broker, false)?;

@@ -1,17 +1,15 @@
 use colored::Color;
-use lazy_static::lazy_static;
 use std::{
     env::VarError,
     fmt::{Display, Formatter, Result},
+    sync::LazyLock,
 };
 
-lazy_static! {
-    static ref KIND: Kind = match std::env::var("KIND") {
-        Err(VarError::NotPresent) => Kind::Main,
-        Ok(k) => Kind::from(k),
-        _ => panic!("invalid KIND"),
-    };
-}
+static KIND: LazyLock<Kind> = LazyLock::new(|| match std::env::var("KIND") {
+    Err(VarError::NotPresent) => Kind::Main,
+    Ok(k) => Kind::from(k),
+    _ => panic!("invalid KIND"),
+});
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum Kind {
@@ -23,7 +21,7 @@ pub enum Kind {
 
 impl Kind {
     pub fn current() -> &'static Self {
-        &*KIND
+        &KIND
     }
 
     pub fn is_main(&self) -> bool {

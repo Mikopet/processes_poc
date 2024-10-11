@@ -1,18 +1,15 @@
-use std::fmt::Arguments;
+use std::{fmt::Arguments, sync::LazyLock};
 
 use colored::{Color, ColoredString, Colorize};
-use lazy_static::lazy_static;
 use log::*;
 
 use crate::Kind;
 
-lazy_static! {
-    static ref LOGGER: Logger = Logger;
-    static ref COLOR: Color = Color::from(Kind::current());
-}
+static LOGGER: Logger = Logger;
+static COLOR: LazyLock<Color> = LazyLock::new(|| Color::from(Kind::current()));
 
 pub fn init() -> Result<(), SetLoggerError> {
-    log::set_logger(&*LOGGER).map(|()| log::set_max_level(LevelFilter::Info))
+    log::set_logger(&LOGGER).map(|()| log::set_max_level(LevelFilter::Info))
 }
 
 pub struct Logger;
