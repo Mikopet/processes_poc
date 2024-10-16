@@ -9,7 +9,7 @@ use std::{
     time::Duration,
 };
 
-use crate::{error, Kind};
+use crate::kind::Kind;
 
 static PROC: LazyLock<Mutex<HashMap<Kind, Child>>> = LazyLock::new(|| Mutex::new(HashMap::new()));
 static EXE: LazyLock<PathBuf> = LazyLock::new(|| current_exe().unwrap());
@@ -22,7 +22,20 @@ pub fn bootstrap() -> Result<(), std::io::Error> {
     Ok(())
 }
 
-pub fn wait() -> Result<bool, std::io::Error> {
+pub fn monitor() {
+    loop {
+        match wait() {
+            Err(e) => {
+                error!("respawn error: {e}");
+                unimplemented!("retry logic missing");
+            }
+            Ok(true) => break,
+            _ => (),
+        }
+    }
+}
+
+fn wait() -> Result<bool, std::io::Error> {
     let (kind, status) = 'outer: loop {
         let mut guard = PROC.lock().unwrap();
 

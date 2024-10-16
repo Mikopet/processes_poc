@@ -23,10 +23,6 @@ impl Kind {
     pub fn current() -> &'static Self {
         &KIND
     }
-
-    pub fn is_main(&self) -> bool {
-        Kind::Main == *self
-    }
 }
 
 impl From<String> for Kind {
