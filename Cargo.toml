@@ -4,6 +4,5 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-backtrace = "0.3"
 colored = "2.1"
 log = "0.4"
