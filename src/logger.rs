@@ -1,5 +1,6 @@
 use colored::{Color, ColoredString, Colorize};
 use log::*;
+use regex::{Captures, Regex, Replacer};
 
 static LOGGER: Logger = Logger;
 
@@ -23,8 +24,11 @@ impl Logger {
         let prefix = format!(
             "{} {} ",
             process.bright_black(),
-            Self::delimiter(l, msg.contains('\n'))
+            Self::delimiter(l, msg.contains('\n')),
         );
+
+        let re = Regex::new(r"(?ms)^(?<label>~[a-z]) (?<msg>.+)$").unwrap();
+        let msg = re.replace(msg.as_str(), Self);
 
         let msg = msg.replace('\n', format!("\n{prefix}").as_str());
 
@@ -62,4 +66,20 @@ impl Log for Logger {
     }
 
     fn flush(&self) {}
+}
+
+impl Replacer for Logger {
+    fn replace_append(&mut self, caps: &Captures<'_>, dst: &mut String) {
+        let bracket = match &caps["label"] {
+            "~p" => "[proc]",
+            "~t" => "[task]",
+            _ => "[ukwn]",
+        };
+
+        let msg = &caps["msg"].replace('\n', format!("\n{bracket} ").as_str());
+
+        dst.push_str(bracket);
+        dst.push_str(" ");
+        dst.push_str(msg);
+    }
 }

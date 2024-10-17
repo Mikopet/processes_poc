@@ -4,7 +4,6 @@ mod proc;
 mod task;
 
 use crate::kind::Kind;
-use log::*;
 
 fn main() {
     logger::init().expect("logger init failure");
@@ -17,5 +16,5 @@ fn main() {
         _ => task::random(),
     }
 
-    info!("all processes finished");
+    log::trace!("~p graceful termination");
 }

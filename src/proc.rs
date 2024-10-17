@@ -25,10 +25,7 @@ pub fn bootstrap() -> Result<(), std::io::Error> {
 pub fn monitor() {
     loop {
         match wait() {
-            Err(e) => {
-                error!("respawn error: {e}");
-                unimplemented!("retry logic missing");
-            }
+            Err(e) => panic!("respawn error: {e}"),
             Ok(true) => break,
             _ => (),
         }
@@ -40,22 +37,29 @@ fn wait() -> Result<bool, std::io::Error> {
         let mut guard = PROC.lock().unwrap();
 
         for (kind, child) in guard.iter_mut() {
-            sleep(Duration::from_secs(1)); // for slow stdout
+            let pid = child.id();
+
+            // for slower stdout
+            if cfg!(debug_assertions) {
+                sleep(Duration::from_millis(1000));
+            } else {
+                sleep(Duration::from_millis(200));
+            }
 
             match child.try_wait() {
                 Ok(Some(status)) => break 'outer (*kind, status),
-                Ok(None) => debug!("`{kind}` is running with pid #{}", child.id()),
-                Err(e) => error!("error attempting to wait for `{kind}`: {e}"),
+                Ok(None) => debug!("~p still waiting for `{kind}#{pid}`"),
+                Err(e) => error!("~p error during waiting for `{kind}#{pid}`: {e}"),
             };
         }
     };
 
     if status.success() {
-        info!("`{kind}` exited successfully {status}");
+        info!("~p `{kind}` succeeded with {status}");
         PROC.lock().unwrap().remove(&kind);
-        debug!("no longer monitoring `{kind}`!");
+        debug!("~p no longer monitoring `{kind}`!");
     } else {
-        error!("`{kind}` exited with failure {status}");
+        error!("~p `{kind}` failed with {status}");
         spawn(kind, true)?;
     }
 
@@ -64,9 +68,9 @@ fn wait() -> Result<bool, std::io::Error> {
 
 fn spawn(k: Kind, r: bool) -> Result<(), std::io::Error> {
     if r {
-        warn!("respawning `{k}`");
+        warn!("~p respawning `{k}`");
     } else {
-        trace!("spawning `{k}`");
+        trace!("~p spawning `{k}`");
     }
 
     let child = Command::new(&*EXE)

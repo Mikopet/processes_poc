@@ -1,4 +1,3 @@
-use colored::Color;
 use std::{
     env::VarError,
     fmt::{Display, Formatter, Result},
@@ -31,7 +30,7 @@ impl From<String> for Kind {
             "Broker" => Self::Broker,
             "Core" => Self::Core,
             "Content" => Self::Content,
-            _ => unimplemented!("process type is unknown"),
+            _ => unimplemented!("unknown KIND"),
         }
     }
 }
@@ -39,16 +38,5 @@ impl From<String> for Kind {
 impl Display for Kind {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         write!(f, "{:?}", self)
-    }
-}
-
-impl From<&Kind> for Color {
-    fn from(k: &Kind) -> Self {
-        match k {
-            Kind::Main => Color::Magenta,
-            Kind::Broker => Color::Green,
-            Kind::Core => Color::Cyan,
-            Kind::Content => Color::Yellow,
-        }
     }
 }
