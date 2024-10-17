@@ -73,6 +73,7 @@ impl Replacer for Logger {
         let bracket = match &caps["label"] {
             "~p" => "[proc]",
             "~t" => "[task]",
+            "~s" => "[sbox]",
             _ => "[ukwn]",
         };
 
