@@ -1,16 +1,13 @@
-use std::{
-    env::VarError,
-    fmt::{Display, Formatter, Result},
-    sync::LazyLock,
-};
+use serde::{Deserialize, Serialize};
+use std::{env, fmt, sync::LazyLock};
 
-static KIND: LazyLock<Kind> = LazyLock::new(|| match std::env::var("KIND") {
-    Err(VarError::NotPresent) => Kind::Main,
-    Ok(k) => Kind::from(k),
+static KIND: LazyLock<Kind> = LazyLock::new(|| match env::var("KIND") {
+    Err(env::VarError::NotPresent) => Kind::Main,
+    Ok(s) => Kind::from(s),
     _ => panic!("invalid KIND"),
 });
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum Kind {
     Main,
     Broker,
@@ -30,13 +27,13 @@ impl From<String> for Kind {
             "Broker" => Self::Broker,
             "Core" => Self::Core,
             "Content" => Self::Content,
-            _ => unimplemented!("unknown KIND"),
+            s => unimplemented!("unknown KIND: `{s}`"),
         }
     }
 }
 
-impl Display for Kind {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+impl fmt::Display for Kind {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{:?}", self)
     }
 }

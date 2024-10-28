@@ -1,0 +1,12 @@
+[Main]
+# TODO: make this more restricted
+fs_ro = ["/"]
+# this is cumulative to child processes. Perhaps main not supposed to be restricted?
+fs_rw = ["sandbox.log"]
+
+[Core]
+fs_rw = ["sandbox.log"]
+tcp_conn = [80, 443]
+
+[Content]
+fs_ro = ["sandbox.log"]

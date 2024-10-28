@@ -76,7 +76,6 @@ fn spawn(k: Kind, r: bool) -> Result<(), std::io::Error> {
     let child = Command::new(&*EXE)
         .env_clear()
         .env("KIND", k.to_string())
-        // .env sandboxing
         .spawn()?;
 
     PROC.lock().unwrap().insert(k, child);
